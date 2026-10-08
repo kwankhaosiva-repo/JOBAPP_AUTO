@@ -1,0 +1,30 @@
+# Git & VCS
+.git
+.gitignore
+
+# Python artifacts
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Environment files
+.env
+.env.*
+
+# Testing & Logs
+.pytest_cache/
+tests/
+*.log
+
+# IDE & OS
+.DS_Store
+.idea/
+.vscode/
+
+# Local docs / Personal files
+docs/
