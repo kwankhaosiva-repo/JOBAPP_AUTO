@@ -78,10 +78,60 @@ class CompatibilityService:
     ):
         self.resume_service = resume_service or ResumeService()
         self.salary_matcher = salary_matcher or SalaryMatcher()
+        self.provider = LLM_PROVIDER
+        self.ollama_base_url = OLLAMA_BASE_URL
+        self.ollama_model = OLLAMA_MODEL
+        self.openai_api_key = OPENAI_API_KEY
+        self.openai_base_url = OPENAI_BASE_URL
+        self.openai_model = OPENAI_MODEL
+        self.threshold = COMPATIBILITY_THRESHOLD
+
+    def update_runtime_config(
+        self,
+        provider: Optional[str] = None,
+        ollama_base_url: Optional[str] = None,
+        ollama_model: Optional[str] = None,
+        openai_api_key: Optional[str] = None,
+        openai_model: Optional[str] = None,
+        compatibility_threshold: Optional[int] = None,
+    ) -> Dict[str, object]:
+        """Updates runtime AI scoring settings without requiring server restart."""
+        if provider:
+            self.provider = provider.strip().lower()
+        if ollama_base_url:
+            self.ollama_base_url = ollama_base_url.strip()
+        if ollama_model:
+            self.ollama_model = ollama_model.strip()
+        if openai_api_key is not None and openai_api_key.strip():
+            self.openai_api_key = openai_api_key.strip()
+        if openai_model:
+            self.openai_model = openai_model.strip()
+        if compatibility_threshold is not None:
+            self.threshold = max(30, min(95, int(compatibility_threshold)))
+        return self.get_status()
+
+    def get_status(self) -> Dict[str, object]:
+        """Returns current AI evaluation engine status and whether an API key is needed."""
+        return {
+            "provider": self.provider,
+            "ollama_base_url": self.ollama_base_url,
+            "ollama_model": self.ollama_model,
+            "openai_model": self.openai_model,
+            "has_openai_key": bool(self.openai_api_key),
+            "compatibility_threshold": self.threshold,
+            "requires_api_key": False,
+            "active_engine_description": (
+                "OpenAI API (" + self.openai_model + ")"
+                if self.provider == "openai" and self.openai_api_key
+                else "Local Ollama (" + self.ollama_model + ")"
+                if self.provider == "ollama"
+                else "Built-in Profile & Goal Matcher (No API Key Needed)"
+            ),
+        }
 
     def evaluate(self, req: CompatibilityRequest) -> CompatibilityResult:
         """Evaluates job compatibility using configured AI provider or smart scorer."""
-        provider = (req.llm_provider or LLM_PROVIDER or "auto").lower()
+        provider = (req.llm_provider or self.provider or "auto").lower()
 
         # First compute deterministic baseline metrics
         baseline = self._evaluate_heuristic(req)
@@ -91,7 +141,7 @@ class CompatibilityService:
             if ollama_res is not None:
                 return ollama_res
 
-        if provider in ("openai", "auto") and OPENAI_API_KEY:
+        if provider in ("openai", "auto") and self.openai_api_key:
             openai_res = self._try_openai_evaluation(req, baseline)
             if openai_res is not None:
                 return openai_res
@@ -178,12 +228,12 @@ class CompatibilityService:
         overall = int(round(skill_score * 0.45 + goal_score * 0.35 + salary_score * 0.20))
         overall = max(10, min(99, overall))
 
-        is_compat = overall >= COMPATIBILITY_THRESHOLD and sal_eval.match_status != "BELOW"
+        is_compat = overall >= self.threshold and sal_eval.match_status != "BELOW"
         recommended_status = "Considering" if is_compat else "Draft"
 
         if overall >= 82:
             verdict = "Strong Match — Highly Recommended"
-        elif overall >= COMPATIBILITY_THRESHOLD:
+        elif overall >= self.threshold:
             verdict = "Good Fit — Recommended for Considering"
         elif overall >= 50:
             verdict = "Moderate Fit — Review Requirements"
@@ -241,9 +291,9 @@ class CompatibilityService:
         try:
             prompt = self._build_llm_prompt(req, baseline)
             resp = requests.post(
-                f"{OLLAMA_BASE_URL.rstrip('/')}/api/generate",
+                f"{self.ollama_base_url.rstrip('/')}/api/generate",
                 json={
-                    "model": OLLAMA_MODEL,
+                    "model": self.ollama_model,
                     "prompt": prompt,
                     "stream": False,
                     "format": "json",
@@ -254,7 +304,7 @@ class CompatibilityService:
                 raw_response = resp.json().get("response", "{}")
                 parsed = json.loads(raw_response)
                 overall = int(parsed.get("overall_score", baseline.overall_score))
-                is_compat = overall >= COMPATIBILITY_THRESHOLD
+                is_compat = overall >= self.threshold
                 return baseline.model_copy(
                     update={
                         "overall_score": overall,
@@ -263,7 +313,7 @@ class CompatibilityService:
                         "is_compatible": is_compat,
                         "recommended_status": "Considering" if is_compat else "Draft",
                         "reasoning": parsed.get("reasoning", baseline.reasoning),
-                        "engine_used": f"ollama ({OLLAMA_MODEL})",
+                        "engine_used": f"ollama ({self.ollama_model})",
                     }
                 )
         except Exception:
@@ -274,18 +324,18 @@ class CompatibilityService:
         self, req: CompatibilityRequest, baseline: CompatibilityResult
     ) -> Optional[CompatibilityResult]:
         """Attempts evaluation via OpenAI-compatible API when OPENAI_API_KEY is configured."""
-        if not OPENAI_API_KEY:
+        if not self.openai_api_key:
             return None
         try:
             prompt = self._build_llm_prompt(req, baseline)
             resp = requests.post(
-                f"{OPENAI_BASE_URL.rstrip('/')}/chat/completions",
+                f"{self.openai_base_url.rstrip('/')}/chat/completions",
                 headers={
-                    "Authorization": f"Bearer {OPENAI_API_KEY}",
+                    "Authorization": f"Bearer {self.openai_api_key}",
                     "Content-Type": "application/json",
                 },
                 json={
-                    "model": OPENAI_MODEL,
+                    "model": self.openai_model,
                     "messages": [{"role": "user", "content": prompt}],
                     "response_format": {"type": "json_object"},
                     "temperature": 0.2,
@@ -296,7 +346,7 @@ class CompatibilityService:
                 content = resp.json()["choices"][0]["message"]["content"]
                 parsed = json.loads(content)
                 overall = int(parsed.get("overall_score", baseline.overall_score))
-                is_compat = overall >= COMPATIBILITY_THRESHOLD
+                is_compat = overall >= self.threshold
                 return baseline.model_copy(
                     update={
                         "overall_score": overall,
@@ -305,7 +355,7 @@ class CompatibilityService:
                         "is_compatible": is_compat,
                         "recommended_status": "Considering" if is_compat else "Draft",
                         "reasoning": parsed.get("reasoning", baseline.reasoning),
-                        "engine_used": f"openai ({OPENAI_MODEL})",
+                        "engine_used": f"openai ({self.openai_model})",
                     }
                 )
         except Exception:

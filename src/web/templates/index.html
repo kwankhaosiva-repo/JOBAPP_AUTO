@@ -1,419 +1,350 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job Application Workspace | Multi-Agent Semi-Auto Suite</title>
-    <meta name="description" content="AI job compatibility evaluation, semi-automated Considering-to-Submitted workflow, CSV & Excel sync, and 5-slide interview presentation preparation.">
+    <title>Kwankhao Sivasomboon — AI Job Discovery &amp; Application Suite</title>
+    <meta name="description" content="Automated multi-platform job discovery, profile compatibility scoring, cover letter generator, and interview slide prep.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <!-- Top Application Header -->
-    <header class="app-header">
-        <div class="header-inner">
-            <div class="brand-group">
-                <div class="brand-logo" aria-hidden="true">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="brand-title">Job Application Workspace</h1>
-                    <p class="brand-subtitle">Multi-Agent Compatibility Scorer, Semi-Auto Tracker &amp; Presentation Prep</p>
+    <!-- Minimal Top Navigation Bar -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div class="brand">
+                <div class="brand-mark">KS</div>
+                <div class="brand-text">
+                    <span class="brand-title" id="profile-name">Kwankhao Sivasomboon</span>
+                    <span class="brand-sub" id="profile-degree">AI &amp; Software Engineer · 40k–45k THB</span>
                 </div>
             </div>
 
-            <div class="header-right">
-                <div class="ai-engine-selector">
-                    <label for="llm-provider-select" class="engine-label">AI Engine:</label>
-                    <select id="llm-provider-select" class="input-control input-sm-select">
-                        <option value="auto">Auto (Ollama / API / Smart Scorer)</option>
-                        <option value="ollama">Localhost Ollama LLM</option>
-                        <option value="openai">OpenAI Cloud API</option>
-                        <option value="heuristic">Built-in Profile Scorer</option>
-                    </select>
+            <!-- 3 Primary Workflow Tabs -->
+            <nav class="main-nav" aria-label="Primary Navigation">
+                <button type="button" class="nav-tab active" id="nav-btn-evaluate" onclick="switchView('evaluate')">
+                    <span class="tab-num">1</span>
+                    <span>Find &amp; Score Jobs</span>
+                </button>
+                <button type="button" class="nav-tab" id="nav-btn-applications" onclick="switchView('applications')">
+                    <span class="tab-num">2</span>
+                    <span>Considering &amp; History</span>
+                    <span class="tab-badge amber" id="nav-considering-count">0</span>
+                </button>
+                <button type="button" class="nav-tab" id="nav-btn-prep" onclick="switchView('prep')">
+                    <span class="tab-num">3</span>
+                    <span>Interview Slide Prep</span>
+                    <span class="tab-badge emerald" id="nav-submitted-count">0</span>
+                </button>
+            </nav>
+
+            <!-- Compact Right Utilities (Popover for Quick Copy + Modal for AI Key Info) -->
+            <div class="topbar-actions">
+                <div class="dropdown-wrap">
+                    <button type="button" class="btn-utility" onclick="toggleQuickCopyMenu(event)">
+                        <span>📋 Quick Form Copy</span>
+                        <span class="caret">▾</span>
+                    </button>
+                    <!-- Floating Quick Copy Menu (Hidden until clicked -> Zero clutter!) -->
+                    <div class="dropdown-panel hidden" id="quick-copy-menu" onclick="event.stopPropagation()">
+                        <div class="dropdown-header">
+                            <span>1-Click Copy for Job Portals</span>
+                            <div class="resume-dl-links">
+                                <a href="/resume/pdf" target="_blank">PDF ↓</a>
+                                <a href="/resume/docx" target="_blank">DOCX ↓</a>
+                            </div>
+                        </div>
+                        <div class="quick-copy-grid">
+                            <button type="button" class="copy-item" onclick="copyField('name_en')">
+                                <span class="copy-k">Full Name</span>
+                                <span class="copy-v">Kwankhao Sivasomboon</span>
+                            </button>
+                            <button type="button" class="copy-item" onclick="copyField('phone')">
+                                <span class="copy-k">Phone</span>
+                                <span class="copy-v">095-959-6921</span>
+                            </button>
+                            <button type="button" class="copy-item" onclick="copyField('email')">
+                                <span class="copy-k">Email</span>
+                                <span class="copy-v">Kwankhaosiva@gmail.com</span>
+                            </button>
+                            <button type="button" class="copy-item" onclick="copyField('salary_en')">
+                                <span class="copy-k">Expected Salary</span>
+                                <span class="copy-v" id="chip-salary-en">40,000 - 45,000 THB</span>
+                            </button>
+                            <button type="button" class="copy-item" onclick="copyField('resume_pdf')">
+                                <span class="copy-k">Resume File Path</span>
+                                <span class="copy-v">Kwankhao_..._Resume.pdf</span>
+                            </button>
+                            <button type="button" class="copy-item" onclick="copyField('portfolio')">
+                                <span class="copy-k">Portfolio / GitHub</span>
+                                <span class="copy-v">kwankhaosiva-repo</span>
+                            </button>
+                        </div>
+                        <div class="dropdown-footer">
+                            <label class="mini-label">Target Salary (THB)</label>
+                            <div class="salary-inline-row">
+                                <input type="number" id="min-salary" value="40000" step="1000" onchange="updateSalaryExpectation()">
+                                <span>–</span>
+                                <input type="number" id="max-salary" value="45000" step="1000" onchange="updateSalaryExpectation()">
+                                <button type="button" class="btn-mini" onclick="setSalaryPreset(40000, 45000)">40k–45k</button>
+                                <button type="button" class="btn-mini" onclick="setSalaryPreset(45000, 55000)">45k–55k</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="header-actions">
-                    <a href="/resume/pdf" target="_blank" class="btn btn-outline btn-sm" id="btn-view-pdf">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                        Resume PDF
-                    </a>
-                    <a href="/api/history/export/excel" class="btn btn-outline btn-sm" id="btn-export-excel">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        Export Excel (.xlsx)
-                    </a>
-                    <a href="/api/history/export/csv" class="btn btn-outline btn-sm" id="btn-export-csv">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        CSV
-                    </a>
-                    <button class="btn btn-primary btn-sm" id="btn-quick-autofill" onclick="copyPlatformPayload('linkedin')">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        Copy Full Payload
-                    </button>
-                </div>
+                <button type="button" class="btn-ai-status" onclick="openModal('ai-settings-modal')" title="Click to view AI scoring engine & optional API key settings">
+                    <span class="status-dot"></span>
+                    <span id="llm-engine-badge">AI Scorer: Ready (No Key Needed)</span>
+                </button>
             </div>
         </div>
     </header>
 
-    <!-- Quick-Copy Candidate Strip -->
-    <div class="quick-copy-strip">
-        <div class="strip-inner">
-            <span class="strip-title">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                One-Click Form Copy:
-            </span>
-            <div class="copy-chips">
-                <button class="copy-chip" onclick="copySnippet('Kwankhao Sivasomboon', 'Full Name')">
-                    <span class="chip-key">Name</span>
-                    <span class="chip-val" id="profile-name">Kwankhao Sivasomboon</span>
-                </button>
-                <button class="copy-chip" onclick="copySnippet('095-959-6921', 'Phone Number')">
-                    <span class="chip-key">Phone</span>
-                    <span class="chip-val mono">095-959-6921</span>
-                </button>
-                <button class="copy-chip" onclick="copySnippet('Kwankhaosiva@gmail.com', 'Email Address')">
-                    <span class="chip-key">Email</span>
-                    <span class="chip-val mono">Kwankhaosiva@gmail.com</span>
-                </button>
-                <button class="copy-chip chip-accent" id="chip-salary" onclick="copySalaryText()">
-                    <span class="chip-key">Expected Salary</span>
-                    <span class="chip-val mono" id="chip-salary-val">40,000 - 45,000 THB</span>
-                </button>
-                <button class="copy-chip" id="chip-pdf-path" onclick="copyResumePath()">
-                    <span class="chip-key">Resume Path</span>
-                    <span class="chip-val mono">Kwankhao_..._Resume.pdf</span>
-                </button>
-                <button class="copy-chip" onclick="copySnippet('https://kwankhaosiva-repo.github.io/Kwankhao_WebCVPort', 'Portfolio URL')">
-                    <span class="chip-key">Portfolio</span>
-                    <span class="chip-val">WebCVPort</span>
-                </button>
-                <span id="profile-degree" style="display:none;"></span>
-            </div>
-        </div>
-    </div>
+    <!-- Main Focused Container -->
+    <main class="workspace">
 
-    <!-- Main Workspace Container -->
-    <main class="workspace-container">
-        <!-- Top Row: 4 KPI Cards & Expected Salary Configuration -->
-        <section class="top-overview-grid">
-            <div class="kpi-group-4">
-                <div class="kpi-card">
-                    <div class="kpi-top">
-                        <span class="kpi-label">Total Tracked</span>
-                        <svg class="kpi-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                    </div>
-                    <div class="kpi-number mono" id="stat-total-apps">27</div>
-                    <div class="kpi-meta">CSV &amp; Excel synced</div>
-                </div>
-
-                <div class="kpi-card">
-                    <div class="kpi-top">
-                        <span class="kpi-label">Considering</span>
-                        <svg class="kpi-icon icon-amber" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                    </div>
-                    <div class="kpi-number mono text-amber" id="stat-considering-apps">0</div>
-                    <div class="kpi-meta">Ready for manual submit</div>
-                </div>
-
-                <div class="kpi-card">
-                    <div class="kpi-top">
-                        <span class="kpi-label">Submitted</span>
-                        <svg class="kpi-icon icon-blue" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                    </div>
-                    <div class="kpi-number mono" id="stat-sent-apps">14</div>
-                    <div class="kpi-meta">Ready for presentation prep</div>
-                </div>
-
-                <div class="kpi-card">
-                    <div class="kpi-top">
-                        <span class="kpi-label">Target Range</span>
-                        <svg class="kpi-icon icon-emerald" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                    </div>
-                    <div class="kpi-number mono text-emerald" id="stat-salary-display">40k - 45k</div>
-                    <div class="kpi-meta">THB / Month</div>
-                </div>
-            </div>
-
-            <!-- Expected Salary Configuration Panel -->
-            <div class="salary-config-card">
-                <div class="salary-config-header">
-                    <div>
-                        <h2 class="card-heading">Expected Salary &amp; Unpriced Job Strategy</h2>
-                        <p class="card-desc">Configure your target range to score job compatibility and auto-fill unpriced Thai postings.</p>
-                    </div>
-                    <label class="checkbox-label" for="include-unspecified-toggle">
-                        <input type="checkbox" id="include-unspecified-toggle" checked onchange="handleSalaryChange()" />
-                        <span>Include unpriced jobs (<span id="stat-strategy-status" class="mono">Smart Auto</span>)</span>
-                    </label>
-                </div>
-
-                <div class="salary-config-body">
-                    <div class="salary-inputs">
-                        <div class="input-field-inline">
-                            <label for="input-min-salary">Min (THB)</label>
-                            <input type="number" id="input-min-salary" class="input-control mono" value="40000" step="1000" onchange="handleSalaryChange()" />
-                        </div>
-                        <span class="range-sep">to</span>
-                        <div class="input-field-inline">
-                            <label for="input-max-salary">Max (THB)</label>
-                            <input type="number" id="input-max-salary" class="input-control mono" value="45000" step="1000" onchange="handleSalaryChange()" />
-                        </div>
-                    </div>
-
-                    <div class="salary-presets">
-                        <span class="preset-label">Presets:</span>
-                        <button type="button" class="btn-preset mono" onclick="setSalaryPreset(35000, 40000, this)">35k–40k</button>
-                        <button type="button" class="btn-preset mono active" onclick="setSalaryPreset(40000, 45000, this)">40k–45k</button>
-                        <button type="button" class="btn-preset mono" onclick="setSalaryPreset(45000, 50000, this)">45k–50k</button>
-                        <button type="button" class="btn-preset mono" onclick="setSalaryPreset(50000, 60000, this)">50k–60k</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Section 1: Platform Search Bar -->
-        <section class="panel-card">
-            <div class="platform-bar-header">
-                <div>
-                    <h2 class="card-heading">1. Job Board Search &amp; Dispatch</h2>
-                    <p class="card-desc">Search across all 6 platforms, paste interesting roles below to evaluate AI compatibility, and shortlist as <code>Considering</code>.</p>
-                </div>
-                <div class="search-query-controls">
-                    <div class="input-with-label">
-                        <label for="quick-keyword">Role Keyword</label>
-                        <input type="text" id="quick-keyword" value="AI Engineer" class="input-control" placeholder="e.g. AI Engineer, Backend" />
-                    </div>
-                    <div class="input-with-label">
-                        <label for="quick-location">Location</label>
-                        <input type="text" id="quick-location" value="Bangkok" class="input-control input-sm-width" placeholder="Bangkok" />
-                    </div>
-                </div>
-            </div>
-
-            <div class="platforms-grid" id="platforms-grid"></div>
-        </section>
-
-        <!-- Section 2 & 3: Main 2-Column Semi-Auto Studio -->
-        <section class="studio-workspace">
-            <!-- Left Column: Job Input & Auto-Shortlist Form -->
-            <div class="panel-card studio-col">
-                <div class="panel-header">
-                    <div>
-                        <h2 class="card-heading">2. Job Evaluation &amp; Shortlist Studio</h2>
-                        <p class="card-desc">Evaluate compatibility with your Resume &amp; <code>aboutme.txt</code> goals. Compatible jobs are tagged as <code>Considering</code> for your manual submission.</p>
-                    </div>
-                </div>
-
-                <form id="app-form" class="studio-form" onsubmit="event.preventDefault(); submitApplication();">
-                    <div class="form-grid-2">
-                        <div class="form-field">
-                            <label class="field-label" for="app-company">Company Name <span class="req">*</span></label>
-                            <input type="text" id="app-company" class="input-control" placeholder="e.g. SCBX, Agoda, Finnomena" required />
-                        </div>
-
-                        <div class="form-field">
-                            <label class="field-label" for="app-position">Job Position <span class="req">*</span></label>
-                            <input type="text" id="app-position" class="input-control" placeholder="e.g. AI Engineer, Software Engineer" required />
-                        </div>
-                    </div>
-
-                    <div class="form-grid-3">
-                        <div class="form-field">
-                            <label class="field-label" for="app-platform">Platform</label>
-                            <select id="app-platform" class="input-control" onchange="onPlatformSelectChange()">
-                                <option value="linkedin">LinkedIn</option>
-                                <option value="jobsdb">JobsDB (SEEK)</option>
-                                <option value="jobthai">JobThai</option>
-                                <option value="jobbkk">JobBKK</option>
-                                <option value="jobtopgun">JobTopGun</option>
-                                <option value="workventure">WorkVenture</option>
-                                <option value="other">Direct / Company Portal</option>
-                            </select>
-                        </div>
-
-                        <div class="form-field">
-                            <label class="field-label" for="app-industry">Industry</label>
-                            <input type="text" id="app-industry" class="input-control" placeholder="e.g. FinTech, Tech, Retail" />
-                        </div>
-
-                        <div class="form-field">
-                            <label class="field-label" for="app-status">Workflow Status</label>
-                            <select id="app-status" class="input-control">
-                                <option value="Considering" selected>Considering (Shortlist)</option>
-                                <option value="Submitted">Submitted (Manual Done)</option>
-                                <option value="Resume Sent">Resume Sent</option>
-                                <option value="Interview Scheduled">Interview Scheduled</option>
-                                <option value="Draft">Draft</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-grid-3">
-                        <div class="form-field span-2">
-                            <label class="field-label" for="app-link">Job Posting URL</label>
-                            <input type="url" id="app-link" class="input-control mono" placeholder="https://..." />
-                        </div>
-
-                        <div class="form-field">
-                            <label class="field-label" for="app-priority">Priority</label>
-                            <select id="app-priority" class="input-control">
-                                <option value="First">First Priority</option>
-                                <option value="Second">Second Priority</option>
-                                <option value="Third">Third Priority</option>
-                                <option value="Backup">Backup</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-field">
-                        <label class="field-label" for="app-focus-domain">Cover Letter Highlight Profile</label>
-                        <select id="app-focus-domain" class="input-control">
-                            <option value="ai_backend">AI &amp; Backend Engineering (FastAPI, Docker, GCP Cloud Run, PyTorch)</option>
-                            <option value="fintech">FinTech &amp; Financial Analysis (LINE Stock Analysis AI Agent, Market Signals)</option>
-                            <option value="vision">Computer Vision &amp; Edge AI (StaffLenz AI, Thai/Lao LPR, YOLOv11)</option>
-                            <option value="rag">GenAI &amp; RAG Systems (Thai Legal RAG, LangGraph, Vector Search)</option>
-                            <option value="product">AI Product &amp; Business Solutions (End-to-End Solution Delivery)</option>
-                        </select>
-                    </div>
-
-                    <div class="form-field">
-                        <div class="label-row">
-                            <label class="field-label" for="app-jd">Job Description / Requirements (JD)</label>
-                            <span class="field-hint">Used by Evaluator Agent &amp; Tailoring Agent</span>
-                        </div>
-                        <textarea id="app-jd" class="input-control textarea-jd" rows="5" placeholder="Paste the job description, required skills, and responsibilities here..."></textarea>
-                    </div>
-
-                    <input type="hidden" id="app-location" value="Bangkok, Thailand" />
-
-                    <div class="form-action-bar">
-                        <button type="button" class="btn btn-secondary" id="btn-evaluate-compat" onclick="evaluateJobCompatibility(false)">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-                            1. Evaluate Compatibility &amp; Letter
-                        </button>
-                        <button type="button" class="btn btn-primary" id="btn-auto-shortlist" onclick="evaluateJobCompatibility(true)">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                            2. Auto-Shortlist as 'Considering'
-                        </button>
-                        <button type="submit" class="btn btn-outline ml-auto" id="btn-save-app">
-                            Save Directly
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Right Column: AI Compatibility Breakdown & Cover Letter -->
-            <div class="panel-card studio-col">
-                <div class="panel-header">
-                    <div>
-                        <h2 class="card-heading">3. AI Compatibility Report &amp; Cover Letter</h2>
-                        <p class="card-desc">Evaluated against Resume PDF, <code>aboutme.txt</code> goals, and target salary</p>
-                    </div>
-                    <button class="btn btn-secondary btn-sm" onclick="copyCoverLetter()" id="btn-copy-cover">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        Copy Cover Letter
+        <!-- ===============================================================
+             VIEW 1: FIND & SCORE JOBS (AUTO-DISCOVERY + MANUAL PASTE MODE)
+             =============================================================== -->
+        <section class="view-section active" id="view-evaluate">
+            <!-- Sub-Mode Switcher: Auto-Find (Default) vs Manual Paste Link/JD -->
+            <div class="mode-bar">
+                <div class="mode-tabs">
+                    <button type="button" class="mode-pill active" id="mode-btn-auto" onclick="switchDiscoveryMode('auto')">
+                        ⚡ Auto-Find Jobs Across Platforms (No Link Needed)
+                    </button>
+                    <button type="button" class="mode-pill" id="mode-btn-manual" onclick="switchDiscoveryMode('manual')">
+                        🔗 Manual Paste Job Link / JD
                     </button>
                 </div>
+                <div class="mode-hint">
+                    <span>Matches scored against your Resume + Career Goals + 40k–45k THB Salary</span>
+                </div>
+            </div>
 
-                <!-- AI Compatibility Breakdown Box -->
-                <div class="compat-report-card" id="compat-report-card">
-                    <div class="compat-top-row">
-                        <div>
-                            <span class="compat-verdict-title" id="compat-verdict-label">Ready for Evaluation</span>
-                            <span class="compat-engine-tag mono" id="compat-engine-tag">Evaluator Agent</span>
+            <!-- SUB-MODE A: AUTOMATED MULTI-PLATFORM JOB DISCOVERY -->
+            <div id="subview-auto-discover" class="subview-panel">
+                <div class="auto-search-card">
+                    <div class="auto-search-top">
+                        <div class="search-input-wrap">
+                            <label for="discover-keywords">Target Roles &amp; Skills</label>
+                            <input
+                                type="text"
+                                id="discover-keywords"
+                                value="AI Engineer, Machine Learning, Python, Data Scientist"
+                                placeholder="e.g., AI Engineer, Machine Learning, Backend Python, FinTech"
+                            >
                         </div>
-                        <div class="compat-score-pill mono" id="compat-overall-score">--%</div>
+
+                        <div class="threshold-wrap">
+                            <label for="discover-threshold">Min Match Score</label>
+                            <select id="discover-threshold">
+                                <option value="60">≥ 60% Match</option>
+                                <option value="65" selected>≥ 65% Match (Recommended)</option>
+                                <option value="75">≥ 75% Strong Match</option>
+                                <option value="80">≥ 80% Top Match Only</option>
+                            </select>
+                        </div>
+
+                        <div class="auto-action-wrap">
+                            <button type="button" class="btn-primary btn-auto-find" id="btn-run-discovery" onclick="runAutoDiscovery()">
+                                ⚡ Auto-Find &amp; Score Jobs
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="compat-subscores">
-                        <div class="subscore-item">
-                            <span class="subscore-label">Resume Skills</span>
-                            <span class="subscore-val mono" id="compat-skill-score">--%</span>
+                    <div class="auto-search-bottom">
+                        <div class="platform-selector-group">
+                            <span class="group-label">Platforms:</span>
+                            <button type="button" class="plat-chip active" data-plat="all" onclick="togglePlatformFilter('all')">All 6 Platforms</button>
+                            <button type="button" class="plat-chip" data-plat="linkedin" onclick="togglePlatformFilter('linkedin')">LinkedIn</button>
+                            <button type="button" class="plat-chip" data-plat="jobsdb" onclick="togglePlatformFilter('jobsdb')">JobsDB</button>
+                            <button type="button" class="plat-chip" data-plat="jobthai" onclick="togglePlatformFilter('jobthai')">JobThai</button>
+                            <button type="button" class="plat-chip" data-plat="jobbkk" onclick="togglePlatformFilter('jobbkk')">JobBKK</button>
+                            <button type="button" class="plat-chip" data-plat="jobtopgun" onclick="togglePlatformFilter('jobtopgun')">JobTopGun</button>
+                            <button type="button" class="plat-chip" data-plat="workventure" onclick="togglePlatformFilter('workventure')">WorkVenture</button>
                         </div>
-                        <div class="subscore-item">
-                            <span class="subscore-label">Career Goals</span>
-                            <span class="subscore-val mono" id="compat-goal-score">--%</span>
-                        </div>
-                        <div class="subscore-item">
-                            <span class="subscore-label">Salary Fit</span>
-                            <span class="subscore-val mono" id="compat-salary-score">--%</span>
-                        </div>
-                    </div>
 
-                    <p class="compat-reasoning" id="compat-reasoning">
-                        Enter a Company Name, Position, and Job Description on the left, then click "Evaluate Compatibility" or "Auto-Shortlist".
-                    </p>
-
-                    <div class="compat-skills-row" id="compat-skills-row" style="display: none;"></div>
-                    <div class="banner-input-preview mono" id="preview-salary-badge">
-                        Form Salary Value: 40,000 - 45,000 THB (Negotiable)
+                        <label class="checkbox-inline">
+                            <input type="checkbox" id="auto-save-considering" checked>
+                            <span>Auto-save compatible jobs to <strong>'Considering'</strong> (CSV &amp; Excel)</span>
+                        </label>
                     </div>
                 </div>
 
-                <!-- Cover Letter Textarea -->
-                <div class="letter-box-wrapper">
-                    <textarea id="cover-letter-output" class="input-control letter-textarea" placeholder="Tailored cover letter will appear here automatically upon evaluation..."></textarea>
+                <!-- Summary Banner after Auto-Discovery -->
+                <div class="discovery-summary hidden" id="discovery-summary-bar">
+                    <div class="summary-metrics">
+                        <span class="metric-pill">Found: <strong id="disc-total-count">0</strong> jobs</span>
+                        <span class="metric-pill emerald">Compatible: <strong id="disc-compat-count">0</strong></span>
+                        <span class="metric-pill amber">Added to 'Considering': <strong id="disc-saved-count">0</strong></span>
+                        <span class="metric-pill muted" id="disc-engine-label">Scorer: Built-in Profile Matcher</span>
+                    </div>
+                    <div class="summary-actions">
+                        <button type="button" class="btn-ghost-sm" onclick="switchView('applications')">
+                            View 'Considering' List →
+                        </button>
+                    </div>
                 </div>
 
-                <div class="letter-meta-bar">
-                    <div class="letter-counts mono">
-                        <span id="letter-word-count">0 words</span>
-                        <span class="dot-sep">•</span>
-                        <span id="letter-read-time">0 min read</span>
+                <!-- Discovered Jobs Grid -->
+                <div class="discovered-grid" id="discovered-jobs-container">
+                    <!-- Populated automatically on load or when clicking Auto-Find -->
+                </div>
+            </div>
+
+            <!-- SUB-MODE B: MANUAL PASTE LINK / JD (KEPT INTACT AS REQUESTED) -->
+            <div id="subview-manual-paste" class="subview-panel hidden">
+                <div class="quick-board-strip">
+                    <span class="strip-label">Open Job Board Search:</span>
+                    <input type="text" id="global-search-keywords" value="AI Engineer" class="strip-input" placeholder="Role keyword">
+                    <div id="platforms-grid" class="strip-pills"></div>
+                </div>
+
+                <div class="manual-grid">
+                    <!-- Left: Input Form -->
+                    <div class="panel">
+                        <h3 class="panel-title">Paste Job Link or Description</h3>
+                        <div class="form-row-2">
+                            <div class="field">
+                                <label for="app-company">Company Name</label>
+                                <input type="text" id="app-company" placeholder="e.g., SCB TechX, KBTG, Agoda">
+                            </div>
+                            <div class="field">
+                                <label for="app-position">Job Title</label>
+                                <input type="text" id="app-position" placeholder="e.g., AI Engineer">
+                            </div>
+                        </div>
+                        <div class="form-row-3">
+                            <div class="field">
+                                <label for="app-platform">Platform</label>
+                                <select id="app-platform">
+                                    <option value="linkedin">LinkedIn</option>
+                                    <option value="jobsdb">JobsDB (SEEK)</option>
+                                    <option value="jobthai">JobThai</option>
+                                    <option value="jobbkk">JobBKK</option>
+                                    <option value="jobtopgun">JobTopGun</option>
+                                    <option value="workventure">WorkVenture</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="app-priority">Priority</label>
+                                <select id="app-priority">
+                                    <option value="First">First Priority</option>
+                                    <option value="Second">Second Priority</option>
+                                    <option value="Third">Third Priority</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="app-link">Job Link (URL)</label>
+                                <input type="url" id="app-link" placeholder="https://...">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="app-jd">Job Description (JD)</label>
+                            <textarea id="app-jd" rows="6" placeholder="Paste the job requirements here..."></textarea>
+                        </div>
+                        <div class="btn-row">
+                            <button type="button" class="btn-primary" onclick="evaluateCompatibilityAndCoverLetter()">
+                                Check Compatibility &amp; Write Cover Letter
+                            </button>
+                            <button type="button" class="btn-amber" onclick="runShortlistPipeline(true)">
+                                + Save as 'Considering'
+                            </button>
+                        </div>
                     </div>
-                    <div class="platform-guide-inline" id="platform-guide-box">
-                        <strong id="guide-title">Semi-Auto Workflow:</strong>
-                        <span id="guide-text">Shortlist as 'Considering' -> Submit manually on platform -> Change status to 'Submitted'.</span>
+
+                    <!-- Right: Score & Cover Letter -->
+                    <div class="panel">
+                        <div class="score-banner">
+                            <div class="score-circle" id="compat-score-ring">
+                                <span id="compat-overall-score">--%</span>
+                            </div>
+                            <div class="score-meta">
+                                <div class="verdict-title" id="compat-verdict-badge">Paste a job to check fit</div>
+                                <p class="verdict-desc" id="compat-reasoning">Evaluates skills, career goals, and 40k–45k THB salary fit.</p>
+                                <div class="mini-bars">
+                                    <span>Skills: <strong id="compat-skill-val">0%</strong></span>
+                                    <span>Goals: <strong id="compat-goal-val">0%</strong></span>
+                                    <span>Salary: <strong id="compat-salary-val">0%</strong></span>
+                                </div>
+                                <div class="hidden">
+                                    <div id="compat-skill-bar"></div>
+                                    <div id="compat-goal-bar"></div>
+                                    <div id="compat-salary-bar"></div>
+                                    <div id="salary-verdict-box"><span id="verdict-title"></span><span id="verdict-desc"></span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="compat-skills-tags" class="tags-row"></div>
+
+                        <div class="cl-header">
+                            <label for="cover-letter-output">Tailored Cover Letter</label>
+                            <div class="cl-actions">
+                                <select id="cl-domain" onchange="generateCoverLetter()">
+                                    <option value="ai_backend">AI &amp; Cloud Backend</option>
+                                    <option value="fintech">FinTech &amp; Analytics</option>
+                                    <option value="vision">Computer Vision</option>
+                                    <option value="rag">GenAI &amp; RAG</option>
+                                    <option value="product">AI Product</option>
+                                </select>
+                                <button type="button" class="btn-ghost-sm" onclick="copyCoverLetter()">Copy Letter</button>
+                            </div>
+                        </div>
+                        <textarea id="cover-letter-output" rows="8" placeholder="Your tailored cover letter will appear here..."></textarea>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Section 4: CSV & Excel Application History Table -->
-        <section class="panel-card">
-            <div class="table-section-header">
+        <!-- ===============================================================
+             VIEW 2: CONSIDERING & APPLICATION HISTORY
+             =============================================================== -->
+        <section class="view-section" id="view-applications">
+            <div class="section-bar">
                 <div>
-                    <h2 class="card-heading">4. Application History &amp; Semi-Auto Queue (<span class="mono">CSV &amp; .xlsx</span>)</h2>
-                    <p class="card-desc">Review jobs in <code>Considering</code>, submit manually, and click <strong>Mark Submitted</strong>. Click <strong>Prep Deck</strong> on any submitted role to prepare your interview presentation.</p>
+                    <h2 class="section-title">Application Tracker (<span id="stat-total">0</span>)</h2>
+                    <p class="section-sub">Review shortlisted <strong>Considering</strong> roles, open their links to apply manually, then click <strong>Mark Submitted</strong>.</p>
                 </div>
-
-                <div class="table-controls">
-                    <div class="search-box">
-                        <svg class="search-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                        <input type="text" id="history-search" class="input-control input-search" placeholder="Filter company, role, notes..." oninput="filterHistoryTable()" />
-                    </div>
-
-                    <div class="status-tabs" id="status-filter-tabs">
-                        <button class="tab-item active" onclick="setStatusFilter('All')">All (<span id="count-all" class="mono">0</span>)</button>
-                        <button class="tab-item" onclick="setStatusFilter('Considering')">Considering (<span id="count-considering" class="mono">0</span>)</button>
-                        <button class="tab-item" onclick="setStatusFilter('Submitted')">Submitted (<span id="count-sent" class="mono">0</span>)</button>
-                        <button class="tab-item" onclick="setStatusFilter('Interview Scheduled')">Interview (<span id="count-interview" class="mono">0</span>)</button>
-                        <button class="tab-item" onclick="setStatusFilter('Not Pass?')">Closed (<span id="count-notpass" class="mono">0</span>)</button>
-                    </div>
-
-                    <button class="btn btn-outline btn-sm" onclick="loadHistory()">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-                        Refresh
-                    </button>
+                <div class="export-group">
+                    <a href="/api/history/export/excel" class="btn-outline-sm">📊 Export Excel (.xlsx)</a>
+                    <a href="/api/history/export/csv" class="btn-outline-sm">📄 Export CSV</a>
                 </div>
             </div>
 
-            <div class="table-container">
-                <table class="history-table" id="history-table">
+            <div class="filter-bar">
+                <div class="status-pills" id="status-filter-tabs">
+                    <button type="button" class="filter-pill active" data-status="All" onclick="setStatusFilter('All')">All</button>
+                    <button type="button" class="filter-pill amber" data-status="Considering" onclick="setStatusFilter('Considering')">
+                        Considering (<span id="stat-considering">0</span>)
+                    </button>
+                    <button type="button" class="filter-pill emerald" data-status="Submitted" onclick="setStatusFilter('Submitted')">
+                        Submitted (<span id="stat-submitted">0</span>)
+                    </button>
+                    <button type="button" class="filter-pill" data-status="HR Contacted" onclick="setStatusFilter('HR Contacted')">
+                        Interviewing (<span id="stat-interview">0</span>)
+                    </button>
+                    <button type="button" class="filter-pill" data-status="Not Pass?" onclick="setStatusFilter('Not Pass?')">
+                        Closed
+                    </button>
+                </div>
+                <input type="text" id="history-search" class="search-box" placeholder="Search company or position..." oninput="loadHistory()">
+            </div>
+
+            <div class="table-card">
+                <table class="clean-table">
                     <thead>
                         <tr>
-                            <th style="width: 48px;">ID</th>
+                            <th>#</th>
                             <th>Company</th>
                             <th>Position</th>
-                            <th style="width: 190px;">Status</th>
-                            <th style="width: 115px;">Date Sent</th>
-                            <th style="width: 165px;">Salary</th>
-                            <th style="width: 240px; text-align: right;">Semi-Auto Actions</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Salary / Match Note</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="history-table-body"></tbody>
@@ -421,63 +352,137 @@
             </div>
         </section>
 
-        <!-- Section 5: Company Intelligence & Presentation Prep Mode (For Submitted Jobs) -->
-        <section class="panel-card" id="prep-studio-section">
-            <div class="table-section-header">
+        <!-- ===============================================================
+             VIEW 3: INTERVIEW & PRESENTATION PREP (FOR SUBMITTED JOBS)
+             =============================================================== -->
+        <section class="view-section" id="view-prep">
+            <div class="section-bar">
                 <div>
-                    <h2 class="card-heading">5. Company Intelligence &amp; Interview Presentation Prep Mode</h2>
-                    <p class="card-desc">Select any <code>Submitted</code> / <code>Resume Sent</code> application to generate company research, a 5-slide presentation outline, and interview talking points.</p>
+                    <h2 class="section-title">Company Intelligence &amp; 5-Slide Interview Deck</h2>
+                    <p class="section-sub">Select any <strong>Submitted</strong> job to generate company background, talking points, and a 5-slide pitch deck.</p>
                 </div>
-
                 <div class="prep-controls">
-                    <select id="prep-job-select" class="input-control" style="min-width: 280px;" onchange="onPrepSelectChange()">
-                        <option value="">-- Select a Submitted Job --</option>
+                    <select id="prep-job-select" onchange="onSelectPrepJob()">
+                        <option value="">— Select Submitted Application —</option>
                     </select>
-                    <button class="btn btn-primary btn-sm" onclick="generatePrepFromSelected()">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-                        Generate 5-Slide Presentation Kit
+                    <button type="button" class="btn-primary" onclick="generateCompanyPrep()">
+                        Generate 5-Slide Deck
                     </button>
-                    <button class="btn btn-secondary btn-sm" onclick="copyPrepMarkdown()">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        Copy Markdown Deck
+                    <button type="button" class="btn-outline-sm" onclick="copyPresentationMarkdown()">
+                        Copy Markdown
                     </button>
                 </div>
             </div>
 
-            <div id="prep-content-area" class="prep-workspace-grid">
-                <!-- Populated dynamically by Prep Agent -->
-                <div class="prep-empty-state">
-                    Select a submitted application above or click <strong>"Prep Deck"</strong> on any row in the History Table to build your customized 5-slide presentation and company research kit.
+            <div id="prep-empty-state" class="empty-card">
+                <p>Select an application above (or click <strong>Prep Slides</strong> in the History tab) to generate your company brief and 5-slide presentation.</p>
+            </div>
+
+            <div id="prep-Result-container" class="prep-layout hidden">
+                <div class="prep-top-grid">
+                    <div class="panel">
+                        <span class="eyebrow" id="prep-industry-tag">Industry</span>
+                        <h3 id="prep-company-title">Company</h3>
+                        <p id="prep-company-overview" class="muted-p"></p>
+                        <div class="callout-box">
+                            <strong>Why Kwankhao Fits:</strong>
+                            <p id="prep-strategic-alignment"></p>
+                        </div>
+                        <div id="prep-research-links" class="links-row"></div>
+                    </div>
+                    <div class="panel">
+                        <span class="eyebrow">Interview Preparation</span>
+                        <h3>Likely Questions &amp; Talking Points</h3>
+                        <div id="prep-qa-list" class="qa-stack"></div>
+                    </div>
                 </div>
+
+                <div class="slides-wrapper">
+                    <h3 class="slides-heading">5-Slide Interview Presentation Outline</h3>
+                    <div id="prep-slides-grid" class="slides-grid"></div>
+                </div>
+                <textarea id="prep-markdown-raw" class="hidden"></textarea>
             </div>
         </section>
     </main>
 
-    <!-- Saved Cover Letter Modal -->
-    <div id="letter-modal" class="modal-backdrop" style="display: none;" onclick="closeModalOnOverlay(event)">
-        <div class="modal-dialog">
+    <!-- ===============================================================
+         MODAL 1: COVER LETTER PREVIEW / COPY MODAL (FOR AUTO-DISCOVERED JOBS)
+         =============================================================== -->
+    <div class="modal-backdrop hidden" id="cover-letter-modal" onclick="closeModal('cover-letter-modal')">
+        <div class="modal-card" onclick="event.stopPropagation()">
             <div class="modal-header">
                 <div>
-                    <h3 class="modal-title" id="modal-company-title">Application Cover Letter</h3>
-                    <p class="modal-subtitle" id="modal-position-title">Position</p>
+                    <h3 id="modal-cl-title">Tailored Cover Letter</h3>
+                    <p class="modal-sub" id="modal-cl-sub"></p>
                 </div>
-                <button class="btn-icon-close" onclick="closeLetterModal()" aria-label="Close modal">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
+                <button type="button" class="modal-close" onclick="closeModal('cover-letter-modal')">✕</button>
             </div>
-            <div class="modal-body">
-                <textarea id="modal-letter-content" class="input-control modal-textarea" readonly></textarea>
-            </div>
+            <textarea id="modal-cl-textarea" rows="12"></textarea>
             <div class="modal-footer">
-                <button class="btn btn-outline" onclick="copyModalLetter()">Copy Text</button>
-                <button class="btn btn-primary" onclick="closeLetterModal()">Close</button>
+                <button type="button" class="btn-outline-sm" onclick="closeModal('cover-letter-modal')">Close</button>
+                <button type="button" class="btn-primary" onclick="copyModalCoverLetter()">📋 Copy Cover Letter</button>
             </div>
         </div>
     </div>
 
-    <!-- Toast Notification Container -->
-    <div id="toast-container" class="toast-container"></div>
+    <!-- ===============================================================
+         MODAL 2: AI ENGINE & OPTIONAL API KEY SETTINGS
+         =============================================================== -->
+    <div class="modal-backdrop hidden" id="ai-settings-modal" onclick="closeModal('ai-settings-modal')">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div>
+                    <h3>AI Compatibility Engine Settings</h3>
+                    <p class="modal-sub">Do you need an API Key? <strong>No!</strong> The Built-in Profile Matcher works immediately for free.</p>
+                </div>
+                <button type="button" class="modal-close" onclick="closeModal('ai-settings-modal')">✕</button>
+            </div>
 
+            <div class="ai-explainer-box">
+                <div class="ai-tier">
+                    <strong>1. Built-in Smart Profile Matcher (Default — Free, No API Key Needed)</strong>
+                    <p>Automatically scores every job (0–100%) against your <code>Kwankhao_Sivasomboon_Resume.pdf</code> skills (Python, FastAPI, PyTorch, YOLOv11, OpenCV, LangChain/RAG, GCP, Docker), <code>aboutme.txt</code> career goals, and 40k–45k THB salary.</p>
+                </div>
+                <div class="ai-tier">
+                    <strong>2. Local Ollama LLM (Optional — Free on your Mac)</strong>
+                    <p>If you run Ollama locally (<code>http://localhost:11434</code>), select <em>Auto / Ollama</em> below.</p>
+                </div>
+                <div class="ai-tier">
+                    <strong>3. OpenAI API Key (Optional)</strong>
+                    <p>If you have an OpenAI API key, you can paste it below for cloud LLM reasoning.</p>
+                </div>
+            </div>
+
+            <div class="form-row-2">
+                <div class="field">
+                    <label for="cfg-llm-provider">Scoring Engine Mode</label>
+                    <select id="cfg-llm-provider">
+                        <option value="auto">Auto (Built-in + Ollama/OpenAI if set)</option>
+                        <option value="heuristic">Built-in Matcher Only (Fastest, No Key)</option>
+                        <option value="ollama">Localhost Ollama LLM</option>
+                        <option value="openai">OpenAI API</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="cfg-ollama-model">Ollama Model Name</label>
+                    <input type="text" id="cfg-ollama-model" value="llama3.2" placeholder="llama3.2 or qwen2.5">
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="cfg-openai-key">Optional OpenAI API Key (Leave blank if not using)</label>
+                <input type="password" id="cfg-openai-key" placeholder="sk-... (Optional — not required)">
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-outline-sm" onclick="closeModal('ai-settings-modal')">Cancel</button>
+                <button type="button" class="btn-primary" onclick="saveAISettings()">Save Engine Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast hidden">Copied!</div>
     <script src="/static/js/app.js"></script>
 </body>
 </html>

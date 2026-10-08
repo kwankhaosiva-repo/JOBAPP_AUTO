@@ -26,11 +26,14 @@ from src.config import (
 )
 from src.models import (
     ApplicationRecord,
+    AutoDiscoverRequest,
+    AutoDiscoverResponse,
     CompanyPrepReport,
     CompanyPrepRequest,
     CompatibilityRequest,
     CompatibilityResult,
     CoverLetterRequest,
+    LLMConfigUpdateRequest,
     PlatformLaunchRequest,
     PlatformSearchRequest,
     SalaryEvaluationResult,
@@ -41,6 +44,7 @@ from src.services.company_prep_service import CompanyPrepService
 from src.services.compatibility_service import CompatibilityService
 from src.services.cover_letter_service import CoverLetterService
 from src.services.history_tracker import HistoryTracker
+from src.services.job_discovery_service import JobDiscoveryService
 from src.services.platforms.platform_manager import PlatformManager
 from src.services.resume_service import ResumeService
 from src.services.salary_matcher import SalaryMatcher
@@ -49,7 +53,7 @@ from src.services.scraper_service import ScraperService
 app = FastAPI(
     title="JOB_APP_AUTO API",
     description="Semi-Automated Multi-Agent Job Application & Presentation Prep Suite",
-    version="2.0.0",
+    version="2.1.0",
 )
 
 app.add_middleware(
@@ -67,6 +71,7 @@ cover_letter_service = CoverLetterService(resume_service)
 history_tracker = HistoryTracker()
 platform_manager = PlatformManager()
 scraper_service = ScraperService()
+job_discovery_service = JobDiscoveryService(platform_manager)
 compatibility_service = CompatibilityService(resume_service, salary_matcher)
 company_prep_service = CompanyPrepService()
 orchestrator = AgentOrchestrator(
@@ -76,6 +81,7 @@ orchestrator = AgentOrchestrator(
     history_tracker=history_tracker,
     platform_manager=platform_manager,
     scraper_service=scraper_service,
+    job_discovery_service=job_discovery_service,
 )
 
 STATIC_DIR = Path(__file__).resolve().parent / "src" / "web" / "static"
@@ -150,14 +156,19 @@ async def get_profile():
 
 @app.get("/api/llm/status")
 async def get_llm_status():
-    return {
-        "provider": LLM_PROVIDER,
-        "ollama_base_url": OLLAMA_BASE_URL,
-        "ollama_model": OLLAMA_MODEL,
-        "openai_model": OPENAI_MODEL,
-        "has_openai_key": bool(OPENAI_API_KEY),
-        "compatibility_threshold": COMPATIBILITY_THRESHOLD,
-    }
+    return compatibility_service.get_status()
+
+
+@app.post("/api/llm/config")
+async def update_llm_config(req: LLMConfigUpdateRequest):
+    return compatibility_service.update_runtime_config(
+        provider=req.provider,
+        ollama_base_url=req.ollama_base_url,
+        ollama_model=req.ollama_model,
+        openai_api_key=req.openai_api_key,
+        openai_model=req.openai_model,
+        compatibility_threshold=req.compatibility_threshold,
+    )
 
 
 @app.get("/api/platforms")
@@ -206,6 +217,14 @@ async def evaluate_salary(req: SalaryCheckRequest):
 async def evaluate_compatibility(req: CompatibilityRequest):
     """Evaluates job compatibility with candidate resume, career goals, and salary."""
     return compatibility_service.evaluate(req)
+
+
+@app.post("/api/pipeline/auto-discover", response_model=AutoDiscoverResponse)
+async def run_auto_discover_pipeline(req: AutoDiscoverRequest):
+    """Automated Multi-Platform Job Discovery + Compatibility Scoring + Considering Shortlist.
+    Does not require pasting links or having an API key.
+    """
+    return orchestrator.auto_discover_and_shortlist(req)
 
 
 class PipelineShortlistRequest(BaseModel):

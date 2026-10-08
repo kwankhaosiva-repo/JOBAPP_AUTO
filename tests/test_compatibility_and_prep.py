@@ -4,11 +4,12 @@ Excel export sync, and Company Presentation Preparation.
 
 import shutil
 from src.config import CSV_HISTORY_PATH
-from src.models import CompanyPrepRequest, CompatibilityRequest
+from src.models import AutoDiscoverRequest, CompanyPrepRequest, CompatibilityRequest
 from src.services.agent_orchestrator import AgentOrchestrator
 from src.services.company_prep_service import CompanyPrepService
 from src.services.compatibility_service import CompatibilityService
 from src.services.history_tracker import HistoryTracker
+from src.services.job_discovery_service import JobDiscoveryService
 
 
 def test_compatibility_high_match():
@@ -82,6 +83,44 @@ def test_orchestrator_shortlist_considering_to_submitted_and_excel(tmp_path):
     assert reloaded.resume_sent != ""  # Submission date automatically stamped
 
 
+def test_auto_discover_and_shortlist_across_platforms(tmp_path):
+    test_csv = tmp_path / "test_discover.csv"
+    test_xlsx = tmp_path / "test_discover.xlsx"
+    shutil.copyfile(CSV_HISTORY_PATH, test_csv)
+
+    tracker = HistoryTracker(csv_path=test_csv, excel_path=test_xlsx)
+    discovery = JobDiscoveryService()
+    orchestrator = AgentOrchestrator(
+        history_tracker=tracker,
+        job_discovery_service=discovery,
+    )
+
+    req = AutoDiscoverRequest(
+        keywords="AI Engineer, Machine Learning, Python",
+        platforms=["linkedin", "jobsdb", "jobthai", "jobbkk", "jobtopgun", "workventure"],
+        min_salary=40000,
+        max_salary=45000,
+        min_score_threshold=65,
+        auto_save_considering=True,
+        max_results=6,
+        llm_provider="heuristic",
+    )
+    resp = orchestrator.auto_discover_and_shortlist(req)
+
+    assert resp.total_found == 6
+    assert resp.compatible_count >= 4
+    assert resp.newly_saved_count >= 1
+    assert resp.requires_api_key is False
+    # Verify sorted descending by compatibility score
+    scores = [j.evaluation.overall_score for j in resp.jobs]
+    assert scores == sorted(scores, reverse=True)
+
+    # Re-running should deduplicate and not add duplicate rows
+    resp_second = orchestrator.auto_discover_and_shortlist(req)
+    assert resp_second.newly_saved_count == 0
+    assert resp_second.already_in_history_count >= 1
+
+
 def test_company_presentation_prep_service():
     prep_service = CompanyPrepService()
     req = CompanyPrepRequest(
@@ -98,3 +137,4 @@ def test_company_presentation_prep_service():
     assert len(report.research_links) >= 3
     assert "Slide 1:" in report.markdown_deck
     assert "Slide 5:" in report.markdown_deck
+

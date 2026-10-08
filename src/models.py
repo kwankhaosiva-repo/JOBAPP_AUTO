@@ -158,3 +158,55 @@ class PlatformSearchRequest(BaseModel):
 class PlatformLaunchRequest(BaseModel):
     platform: str
     job_url: str
+
+
+class AutoDiscoverRequest(BaseModel):
+    keywords: str = "AI Engineer, Machine Learning, Python"
+    platforms: List[str] = Field(
+        default_factory=lambda: ["linkedin", "jobsdb", "jobthai", "jobbkk", "jobtopgun", "workventure"]
+    )
+    location: str = "Bangkok"
+    min_salary: int = 40000
+    max_salary: int = 45000
+    min_score_threshold: int = 65
+    auto_save_considering: bool = True
+    max_results: int = 12
+    llm_provider: Optional[str] = None
+
+
+class DiscoveredJobItem(BaseModel):
+    company_name: str
+    job_position: str
+    platform: str
+    platform_name: str
+    location: str
+    industry: str = ""
+    salary_tag: str = "Not specified"
+    link: str
+    job_description: str
+    source_type: str = "live_or_curated"
+    evaluation: CompatibilityResult
+    cover_letter: str
+    saved_to_considering: bool = False
+    already_in_history: bool = False
+    record_id: Optional[int] = None
+
+
+class AutoDiscoverResponse(BaseModel):
+    total_found: int
+    compatible_count: int
+    newly_saved_count: int
+    already_in_history_count: int
+    engine_used: str
+    requires_api_key: bool = False
+    jobs: List[DiscoveredJobItem]
+
+
+class LLMConfigUpdateRequest(BaseModel):
+    provider: str = "auto"  # auto, heuristic, ollama, openai
+    ollama_base_url: Optional[str] = None
+    ollama_model: Optional[str] = None
+    openai_api_key: Optional[str] = None
+    openai_model: Optional[str] = None
+    compatibility_threshold: Optional[int] = None
+
