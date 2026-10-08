@@ -110,10 +110,13 @@
 - **Entrypoint**: `app.py` (FastAPI backend + interactive Modern Web UI) and `main.py` (CLI orchestration).
 - **Core Purpose**: Automated Job Application Assistant for Thai & Global job boards (LinkedIn, JobsDB, JobThai, JobBKK, JobTopGun, WorkVenture).
 - **Key Modules**:
-  - `src/config.py`: Centralized configuration (salary ranges, platform settings, file paths).
+  - `src/config.py`: Centralized configuration (salary ranges, platform settings, file paths, pluggable Ollama/OpenAI LLM config).
   - `src/services/resume_service.py`: Resume reader & profile extractor.
-  - `src/services/cover_letter_service.py`: Personalized cover letter generator matching candidate background (`aboutme.txt`) with Job Description.
-  - `src/services/history_tracker.py`: History tracker synced with `docs/Job Application - Second Jobber.csv`.
+  - `src/services/compatibility_service.py`: Evaluator Agent scoring job compatibility against resume skills, `aboutme.txt` career goals, and salary (supports Ollama, OpenAI, and deterministic fallback).
+  - `src/services/cover_letter_service.py`: Tailoring Agent generating personalized cover letters matching candidate background (`aboutme.txt`) with Job Description.
+  - `src/services/company_prep_service.py`: Prep Agent building company intelligence briefs and 5-slide presentation outlines for `Submitted` applications.
+  - `src/services/agent_orchestrator.py`: Multi-agent pipeline coordinator (`Scout -> Evaluator -> Tailoring -> Prep`).
+  - `src/services/history_tracker.py`: Bi-directional history tracker synced with `docs/Job Application - Second Jobber.csv` and `docs/Job Application - Second Jobber.xlsx`.
   - `src/services/salary_matcher.py`: Salary filter & parser handling jobs with and without explicit salary tags.
   - `src/services/platforms/`: Platform adapters and automation handlers for LinkedIn, JobsDB, JobThai, JobBKK, JobTopGun, and WorkVenture.
-- **Testing**: `pytest tests/`
+- **Testing**: `python3 -m pytest tests/`

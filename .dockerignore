@@ -1,9 +1,9 @@
-# Git & VCS
-.git
+# Git & Version Control
+.git/
 .gitignore
 
-# Python artifacts
-__pycache__
+# Python artifacts & Caches
+__pycache__/
 *.pyc
 *.pyo
 *.pyd
@@ -11,20 +11,33 @@ __pycache__
 env/
 venv/
 .venv/
+ENV/
 
-# Environment files
+# Environment files & Secrets
 .env
 .env.*
+!.env.example
 
-# Testing & Logs
+# Testing, Logs & Reports
 .pytest_cache/
 tests/
 *.log
+.coverage
+htmlcov/
+test-results/
+playwright-report/
 
-# IDE & OS
+# IDE, OS & Editor artifacts
 .DS_Store
 .idea/
 .vscode/
 
-# Local docs / Personal files
+# Agent caches, local skills & scripts
+scripts/
+skills/
+skills-lock.json
+.antigravity/
+.agents/
+
+# Personal / Sensitive Application Docs & Resumes
 docs/

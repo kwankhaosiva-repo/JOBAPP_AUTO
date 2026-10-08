@@ -1,20 +1,20 @@
 """CLI Orchestration entrypoint for JOB_APP_AUTO.
 
-Allows searching platforms, generating tailored cover letters, evaluating
-salaries, and logging applications directly from the terminal or scripts.
+Allows searching platforms, evaluating AI compatibility, shortlisting jobs
+as 'Considering', exporting CSV/Excel, generating tailored cover letters,
+and building 5-slide company presentation kits from the terminal.
 """
 
 import argparse
 import sys
-from typing import Optional
 import uvicorn
 
 from src.config import DEFAULT_MAX_SALARY, DEFAULT_MIN_SALARY
 from src.models import ApplicationRecord, CoverLetterRequest, SalaryExpectation
+from src.services.agent_orchestrator import AgentOrchestrator
 from src.services.cover_letter_service import CoverLetterService
 from src.services.history_tracker import HistoryTracker
 from src.services.platforms.platform_manager import PlatformManager
-from src.services.resume_service import ResumeService
 from src.services.salary_matcher import SalaryMatcher
 
 
@@ -25,7 +25,8 @@ def cmd_stats(args):
     print("       JOB_APP_AUTO - APPLICATION DASHBOARD STATS       ")
     print("=======================================================")
     print(f" Total Applications Tracked: {stats['total_applications']}")
-    print(f" Resumes Sent:              {stats['resumes_sent']}")
+    print(f" Considering (Shortlisted):  {stats['considering_count']}")
+    print(f" Submitted / Resumes Sent:   {stats['resumes_sent']}")
     print(f" Interviewing / In Progress: {stats['interviewing']}")
     print(f" Status 'Not Pass?':         {stats['not_pass']}")
     print("-------------------------------------------------------")
@@ -40,7 +41,6 @@ def cmd_search(args):
     plat = pm.get_platform(args.platform)
     if not plat:
         print(f"Error: Unknown platform '{args.platform}'.")
-        print("Supported platforms: linkedin, jobsdb, jobthai, jobbkk, jobtopgun, workventure")
         sys.exit(1)
 
     url = plat.build_search_url(keywords=args.keywords, location=args.location)
@@ -69,6 +69,60 @@ def cmd_evaluate_salary(args):
     print(f" Suggested Form (EN): {res.suggested_form_input}")
     print(f" Suggested Form (TH): {res.thai_suggested_input}")
     print("=======================================================\n")
+
+
+def cmd_evaluate_compat(args):
+    orchestrator = AgentOrchestrator()
+    res = orchestrator.evaluate_and_shortlist(
+        company_name=args.company,
+        job_position=args.role,
+        job_description=args.jd or "",
+        link=args.link or "",
+        platform=args.platform,
+        min_salary=args.min_salary,
+        max_salary=args.max_salary,
+        auto_save_if_compatible=args.shortlist,
+        llm_provider=args.provider,
+    )
+    ev = res["evaluation"]
+    print("\n=======================================================")
+    print("         AI JOB COMPATIBILITY EVALUATION REPORT        ")
+    print("=======================================================")
+    print(f" Company & Role:      {args.company} — {args.role}")
+    print(f" Engine Used:         {ev['engine_used']}")
+    print(f" Overall Match Score: {ev['overall_score']}% ({ev['verdict_label']})")
+    print(f"   • Resume Skills:   {ev['skill_match_score']}%")
+    print(f"   • Goal Alignment:  {ev['goal_alignment_score']}%")
+    print(f"   • Salary Fit:      {ev['salary_fit_score']}%")
+    print(f" Matched Skills:      {', '.join(ev['matched_skills']) or 'General'}")
+    print(f" Career Goals Fit:    {', '.join(ev['matched_goals']) or 'Engineering'}")
+    print(f" Analysis:            {ev['reasoning']}")
+    if res["saved_to_history"]:
+        rec = res["record"]
+        print("-------------------------------------------------------")
+        print(f" [SHORTLISTED] Saved as #{rec['id']} with status '{rec['status']}' in CSV & Excel!")
+    print("=======================================================\n")
+
+
+def cmd_prep(args):
+    orchestrator = AgentOrchestrator()
+    report = orchestrator.prepare_presentation_for_submitted(
+        record_id=args.id,
+        company_name=args.company or "",
+        job_position=args.role or "",
+        job_description=args.jd or "",
+    )
+    print("\n" + report.markdown_deck + "\n")
+    if args.output:
+        with open(args.output, "w", encoding="utf-8") as f:
+            f.write(report.markdown_deck)
+        print(f"Saved presentation prep deck to: {args.output}")
+
+
+def cmd_export_excel(args):
+    tracker = HistoryTracker()
+    path = tracker.export_to_excel()
+    print(f"\nExported formatted Excel workbook to: {path}\n")
 
 
 def cmd_cover_letter(args):
@@ -106,7 +160,7 @@ def cmd_log_app(args):
         notes=args.notes or "",
     )
     added = tracker.add_record(record)
-    print(f"\nSuccessfully logged application #{added.id} for '{args.company}' into CSV!")
+    print(f"\nSuccessfully logged application #{added.id} for '{args.company}' (Status: {added.status}) into CSV & Excel!")
 
 
 def cmd_serve(args):
@@ -116,7 +170,7 @@ def cmd_serve(args):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="JOB_APP_AUTO: Intelligent Job Application & Second Jobber Tracking Suite"
+        description="JOB_APP_AUTO: Semi-Auto Multi-Agent Job Application & Presentation Prep Suite"
     )
     subparsers = parser.add_subparsers(dest="command", help="Available subcommands")
 
@@ -145,6 +199,32 @@ def main():
     sub_eval.add_argument("--max-salary", type=int, default=DEFAULT_MAX_SALARY)
     sub_eval.set_defaults(func=cmd_evaluate_salary)
 
+    # evaluate-compat
+    sub_compat = subparsers.add_parser("evaluate-compat", help="Evaluate job compatibility with AI & profile")
+    sub_compat.add_argument("--company", required=True, help="Company name")
+    sub_compat.add_argument("--role", required=True, help="Job position")
+    sub_compat.add_argument("--jd", default="", help="Job description text")
+    sub_compat.add_argument("--link", default="", help="Job posting URL")
+    sub_compat.add_argument("--platform", default="linkedin", help="Platform ID")
+    sub_compat.add_argument("--min-salary", type=int, default=DEFAULT_MIN_SALARY)
+    sub_compat.add_argument("--max-salary", type=int, default=DEFAULT_MAX_SALARY)
+    sub_compat.add_argument("--provider", default=None, help="LLM provider: auto, ollama, openai, heuristic")
+    sub_compat.add_argument("--shortlist", action="store_true", help="Save to CSV & Excel as 'Considering' if compatible")
+    sub_compat.set_defaults(func=cmd_evaluate_compat)
+
+    # prep
+    sub_prep = subparsers.add_parser("prep", help="Generate company research & 5-slide presentation deck")
+    sub_prep.add_argument("--id", type=int, default=None, help="Record ID from CSV")
+    sub_prep.add_argument("--company", default="", help="Company name")
+    sub_prep.add_argument("--role", default="", help="Job position")
+    sub_prep.add_argument("--jd", default="", help="Job description")
+    sub_prep.add_argument("--output", default="", help="Save markdown presentation deck to file")
+    sub_prep.set_defaults(func=cmd_prep)
+
+    # export-excel
+    sub_excel = subparsers.add_parser("export-excel", help="Sync and export CSV history to Excel (.xlsx)")
+    sub_excel.set_defaults(func=cmd_export_excel)
+
     # cover-letter
     sub_cl = subparsers.add_parser("cover-letter", help="Generate tailored cover letter")
     sub_cl.add_argument("--company", required=True, help="Target company name")
@@ -156,12 +236,12 @@ def main():
     sub_cl.set_defaults(func=cmd_cover_letter)
 
     # log-app
-    sub_log = subparsers.add_parser("log-app", help="Log an application into the CSV")
+    sub_log = subparsers.add_parser("log-app", help="Log an application into CSV & Excel")
     sub_log.add_argument("--company", required=True, help="Company name")
     sub_log.add_argument("--role", required=True, help="Job position")
     sub_log.add_argument("--link", default="", help="Job posting link")
     sub_log.add_argument("--jd", default="", help="Job description")
-    sub_log.add_argument("--status", default="Resume Sent", help="Status")
+    sub_log.add_argument("--status", default="Considering", help="Status (default: Considering)")
     sub_log.add_argument("--min-salary", type=int, default=DEFAULT_MIN_SALARY)
     sub_log.add_argument("--max-salary", type=int, default=DEFAULT_MAX_SALARY)
     sub_log.add_argument("--notes", default="", help="Notes")

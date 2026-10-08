@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job Application Workspace | Kwankhao Sivasomboon</title>
-    <meta name="description" content="Professional job application management, tailored cover letter generation, salary benchmarking, and CSV history tracking across LinkedIn, JobsDB, JobThai, JobBKK, JobTopGun, and WorkVenture.">
-    <!-- Professional Corporate Typography: Inter & JetBrains Mono -->
+    <title>Job Application Workspace | Multi-Agent Semi-Auto Suite</title>
+    <meta name="description" content="AI job compatibility evaluation, semi-automated Considering-to-Submitted workflow, CSV & Excel sync, and 5-slide interview presentation preparation.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -24,38 +23,44 @@
                 </div>
                 <div>
                     <h1 class="brand-title">Job Application Workspace</h1>
-                    <p class="brand-subtitle">Automated Dispatch, Cover Letter Synthesis &amp; CSV Tracker</p>
+                    <p class="brand-subtitle">Multi-Agent Compatibility Scorer, Semi-Auto Tracker &amp; Presentation Prep</p>
                 </div>
             </div>
 
             <div class="header-right">
-                <div class="candidate-badge" id="candidate-pill">
-                    <div class="avatar-circle">KS</div>
-                    <div class="candidate-info">
-                        <span class="candidate-name" id="profile-name">Kwankhao Sivasomboon</span>
-                        <span class="candidate-detail" id="profile-degree">B.Eng. Chulalongkorn • AI &amp; Software Engineer</span>
-                    </div>
+                <div class="ai-engine-selector">
+                    <label for="llm-provider-select" class="engine-label">AI Engine:</label>
+                    <select id="llm-provider-select" class="input-control input-sm-select">
+                        <option value="auto">Auto (Ollama / API / Smart Scorer)</option>
+                        <option value="ollama">Localhost Ollama LLM</option>
+                        <option value="openai">OpenAI Cloud API</option>
+                        <option value="heuristic">Built-in Profile Scorer</option>
+                    </select>
                 </div>
 
                 <div class="header-actions">
                     <a href="/resume/pdf" target="_blank" class="btn btn-outline btn-sm" id="btn-view-pdf">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
                         Resume PDF
                     </a>
-                    <a href="/resume/docx" class="btn btn-outline btn-sm" id="btn-view-docx">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        DOCX
+                    <a href="/api/history/export/excel" class="btn btn-outline btn-sm" id="btn-export-excel">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Export Excel (.xlsx)
+                    </a>
+                    <a href="/api/history/export/csv" class="btn btn-outline btn-sm" id="btn-export-csv">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        CSV
                     </a>
                     <button class="btn btn-primary btn-sm" id="btn-quick-autofill" onclick="copyPlatformPayload('linkedin')">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        Copy Full Profile Payload
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copy Full Payload
                     </button>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Quick-Copy Candidate Strip (Ergonomic Bar for Form Filling) -->
+    <!-- Quick-Copy Candidate Strip -->
     <div class="quick-copy-strip">
         <div class="strip-inner">
             <span class="strip-title">
@@ -65,7 +70,7 @@
             <div class="copy-chips">
                 <button class="copy-chip" onclick="copySnippet('Kwankhao Sivasomboon', 'Full Name')">
                     <span class="chip-key">Name</span>
-                    <span class="chip-val">Kwankhao Sivasomboon</span>
+                    <span class="chip-val" id="profile-name">Kwankhao Sivasomboon</span>
                 </button>
                 <button class="copy-chip" onclick="copySnippet('095-959-6921', 'Phone Number')">
                     <span class="chip-key">Phone</span>
@@ -80,49 +85,54 @@
                     <span class="chip-val mono" id="chip-salary-val">40,000 - 45,000 THB</span>
                 </button>
                 <button class="copy-chip" id="chip-pdf-path" onclick="copyResumePath()">
-                    <span class="chip-key">File Path</span>
+                    <span class="chip-key">Resume Path</span>
                     <span class="chip-val mono">Kwankhao_..._Resume.pdf</span>
                 </button>
                 <button class="copy-chip" onclick="copySnippet('https://kwankhaosiva-repo.github.io/Kwankhao_WebCVPort', 'Portfolio URL')">
                     <span class="chip-key">Portfolio</span>
                     <span class="chip-val">WebCVPort</span>
                 </button>
-                <button class="copy-chip" onclick="copySnippet('https://linkedin.com/in/kwankhao-sivasomboon', 'LinkedIn URL')">
-                    <span class="chip-key">LinkedIn</span>
-                    <span class="chip-val">in/kwankhao-sivasomboon</span>
-                </button>
+                <span id="profile-degree" style="display:none;"></span>
             </div>
         </div>
     </div>
 
-    <!-- Main Content Container -->
+    <!-- Main Workspace Container -->
     <main class="workspace-container">
-        <!-- Top Row: KPI Summary & Expected Salary Controls -->
+        <!-- Top Row: 4 KPI Cards & Expected Salary Configuration -->
         <section class="top-overview-grid">
-            <!-- KPI Metrics -->
-            <div class="kpi-group">
+            <div class="kpi-group-4">
                 <div class="kpi-card">
                     <div class="kpi-top">
                         <span class="kpi-label">Total Tracked</span>
-                        <svg class="kpi-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                        <svg class="kpi-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
                     </div>
                     <div class="kpi-number mono" id="stat-total-apps">27</div>
-                    <div class="kpi-meta">Synced with CSV</div>
+                    <div class="kpi-meta">CSV &amp; Excel synced</div>
                 </div>
 
                 <div class="kpi-card">
                     <div class="kpi-top">
-                        <span class="kpi-label">Resumes Sent</span>
-                        <svg class="kpi-icon icon-blue" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        <span class="kpi-label">Considering</span>
+                        <svg class="kpi-icon icon-amber" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    </div>
+                    <div class="kpi-number mono text-amber" id="stat-considering-apps">0</div>
+                    <div class="kpi-meta">Ready for manual submit</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-top">
+                        <span class="kpi-label">Submitted</span>
+                        <svg class="kpi-icon icon-blue" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                     </div>
                     <div class="kpi-number mono" id="stat-sent-apps">14</div>
-                    <div class="kpi-meta">Active applications</div>
+                    <div class="kpi-meta">Ready for presentation prep</div>
                 </div>
 
                 <div class="kpi-card">
                     <div class="kpi-top">
                         <span class="kpi-label">Target Range</span>
-                        <svg class="kpi-icon icon-emerald" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                        <svg class="kpi-icon icon-emerald" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                     </div>
                     <div class="kpi-number mono text-emerald" id="stat-salary-display">40k - 45k</div>
                     <div class="kpi-meta">THB / Month</div>
@@ -134,11 +144,11 @@
                 <div class="salary-config-header">
                     <div>
                         <h2 class="card-heading">Expected Salary &amp; Unpriced Job Strategy</h2>
-                        <p class="card-desc">Most Thai job postings omit salary tags. Configure your target bracket to auto-fill forms and benchmark roles.</p>
+                        <p class="card-desc">Configure your target range to score job compatibility and auto-fill unpriced Thai postings.</p>
                     </div>
                     <label class="checkbox-label" for="include-unspecified-toggle">
                         <input type="checkbox" id="include-unspecified-toggle" checked onchange="handleSalaryChange()" />
-                        <span>Include jobs without salary tags (<span id="stat-strategy-status" class="mono">Smart Auto</span>)</span>
+                        <span>Include unpriced jobs (<span id="stat-strategy-status" class="mono">Smart Auto</span>)</span>
                     </label>
                 </div>
 
@@ -166,12 +176,12 @@
             </div>
         </section>
 
-        <!-- Platform Search Bar -->
+        <!-- Section 1: Platform Search Bar -->
         <section class="panel-card">
             <div class="platform-bar-header">
                 <div>
                     <h2 class="card-heading">1. Job Board Search &amp; Dispatch</h2>
-                    <p class="card-desc">Enter your target role and click any job board to launch a filtered search or copy platform-specific form data.</p>
+                    <p class="card-desc">Search across all 6 platforms, paste interesting roles below to evaluate AI compatibility, and shortlist as <code>Considering</code>.</p>
                 </div>
                 <div class="search-query-controls">
                     <div class="input-with-label">
@@ -185,19 +195,17 @@
                 </div>
             </div>
 
-            <div class="platforms-grid" id="platforms-grid">
-                <!-- Populated by app.js -->
-            </div>
+            <div class="platforms-grid" id="platforms-grid"></div>
         </section>
 
-        <!-- Main 2-Column Application Studio -->
+        <!-- Section 2 & 3: Main 2-Column Semi-Auto Studio -->
         <section class="studio-workspace">
-            <!-- Left Column: Job Details Input -->
+            <!-- Left Column: Job Input & Auto-Shortlist Form -->
             <div class="panel-card studio-col">
                 <div class="panel-header">
                     <div>
-                        <h2 class="card-heading">2. Application Details</h2>
-                        <p class="card-desc">Enter the target role details to generate a customized cover letter and log to your CSV tracker.</p>
+                        <h2 class="card-heading">2. Job Evaluation &amp; Shortlist Studio</h2>
+                        <p class="card-desc">Evaluate compatibility with your Resume &amp; <code>aboutme.txt</code> goals. Compatible jobs are tagged as <code>Considering</code> for your manual submission.</p>
                     </div>
                 </div>
 
@@ -205,7 +213,7 @@
                     <div class="form-grid-2">
                         <div class="form-field">
                             <label class="field-label" for="app-company">Company Name <span class="req">*</span></label>
-                            <input type="text" id="app-company" class="input-control" placeholder="e.g. SCBX, Agoda, Makro PRO" required />
+                            <input type="text" id="app-company" class="input-control" placeholder="e.g. SCBX, Agoda, Finnomena" required />
                         </div>
 
                         <div class="form-field">
@@ -234,13 +242,13 @@
                         </div>
 
                         <div class="form-field">
-                            <label class="field-label" for="app-status">Application Status</label>
+                            <label class="field-label" for="app-status">Workflow Status</label>
                             <select id="app-status" class="input-control">
+                                <option value="Considering" selected>Considering (Shortlist)</option>
+                                <option value="Submitted">Submitted (Manual Done)</option>
                                 <option value="Resume Sent">Resume Sent</option>
-                                <option value="Draft">Draft</option>
-                                <option value="HR Contacted">HR Contacted</option>
                                 <option value="Interview Scheduled">Interview Scheduled</option>
-                                <option value="Not Pass?">Not Pass?</option>
+                                <option value="Draft">Draft</option>
                             </select>
                         </div>
                     </div>
@@ -275,41 +283,36 @@
 
                     <div class="form-field">
                         <div class="label-row">
-                            <label class="field-label" for="app-jd">Job Description / Salary Excerpt</label>
-                            <span class="field-hint">Used to tailor cover letter and detect salary tags</span>
+                            <label class="field-label" for="app-jd">Job Description / Requirements (JD)</label>
+                            <span class="field-hint">Used by Evaluator Agent &amp; Tailoring Agent</span>
                         </div>
-                        <textarea id="app-jd" class="input-control textarea-jd" rows="5" placeholder="Paste the job description, requirements, or salary info here..."></textarea>
+                        <textarea id="app-jd" class="input-control textarea-jd" rows="5" placeholder="Paste the job description, required skills, and responsibilities here..."></textarea>
                     </div>
 
                     <input type="hidden" id="app-location" value="Bangkok, Thailand" />
 
                     <div class="form-action-bar">
-                        <button type="button" class="btn btn-secondary" id="btn-generate-cover" onclick="triggerGenerateCoverLetter()">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                            Generate Cover Letter
+                        <button type="button" class="btn btn-secondary" id="btn-evaluate-compat" onclick="evaluateJobCompatibility(false)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                            1. Evaluate Compatibility &amp; Letter
                         </button>
-                        <button type="button" class="btn btn-outline" id="btn-eval-salary" onclick="evaluateCurrentJD()">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                            Check Salary Fit
+                        <button type="button" class="btn btn-primary" id="btn-auto-shortlist" onclick="evaluateJobCompatibility(true)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            2. Auto-Shortlist as 'Considering'
                         </button>
-                        <button type="button" class="btn btn-outline" id="btn-open-job" onclick="openJobLink()">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                            Open Link
-                        </button>
-                        <button type="submit" class="btn btn-primary ml-auto" id="btn-save-app">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                            Save to History CSV
+                        <button type="submit" class="btn btn-outline ml-auto" id="btn-save-app">
+                            Save Directly
                         </button>
                     </div>
                 </form>
             </div>
 
-            <!-- Right Column: Cover Letter Output & Salary Assessment -->
+            <!-- Right Column: AI Compatibility Breakdown & Cover Letter -->
             <div class="panel-card studio-col">
                 <div class="panel-header">
                     <div>
-                        <h2 class="card-heading">3. Tailored Cover Letter &amp; Fit Check</h2>
-                        <p class="card-desc">Grounded in <code>aboutme.txt</code> and <code>example_coverletter.txt</code></p>
+                        <h2 class="card-heading">3. AI Compatibility Report &amp; Cover Letter</h2>
+                        <p class="card-desc">Evaluated against Resume PDF, <code>aboutme.txt</code> goals, and target salary</p>
                     </div>
                     <button class="btn btn-secondary btn-sm" onclick="copyCoverLetter()" id="btn-copy-cover">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
@@ -317,23 +320,44 @@
                     </button>
                 </div>
 
-                <!-- Salary Evaluation Result Box -->
-                <div class="salary-check-banner" id="salary-eval-result">
-                    <div class="banner-row">
-                        <span class="banner-title">Salary Benchmark &amp; Form Input</span>
-                        <span class="banner-status mono" id="eval-status-badge">READY</span>
+                <!-- AI Compatibility Breakdown Box -->
+                <div class="compat-report-card" id="compat-report-card">
+                    <div class="compat-top-row">
+                        <div>
+                            <span class="compat-verdict-title" id="compat-verdict-label">Ready for Evaluation</span>
+                            <span class="compat-engine-tag mono" id="compat-engine-tag">Evaluator Agent</span>
+                        </div>
+                        <div class="compat-score-pill mono" id="compat-overall-score">--%</div>
                     </div>
-                    <p class="banner-text" id="eval-explanation">
-                        Paste a job description or salary text (e.g., "42,000 - 55,000 THB" or "Negotiable") and click "Check Salary Fit".
+
+                    <div class="compat-subscores">
+                        <div class="subscore-item">
+                            <span class="subscore-label">Resume Skills</span>
+                            <span class="subscore-val mono" id="compat-skill-score">--%</span>
+                        </div>
+                        <div class="subscore-item">
+                            <span class="subscore-label">Career Goals</span>
+                            <span class="subscore-val mono" id="compat-goal-score">--%</span>
+                        </div>
+                        <div class="subscore-item">
+                            <span class="subscore-label">Salary Fit</span>
+                            <span class="subscore-val mono" id="compat-salary-score">--%</span>
+                        </div>
+                    </div>
+
+                    <p class="compat-reasoning" id="compat-reasoning">
+                        Enter a Company Name, Position, and Job Description on the left, then click "Evaluate Compatibility" or "Auto-Shortlist".
                     </p>
+
+                    <div class="compat-skills-row" id="compat-skills-row" style="display: none;"></div>
                     <div class="banner-input-preview mono" id="preview-salary-badge">
-                        Form Value: 40,000 - 45,000 THB (Negotiable)
+                        Form Salary Value: 40,000 - 45,000 THB (Negotiable)
                     </div>
                 </div>
 
                 <!-- Cover Letter Textarea -->
                 <div class="letter-box-wrapper">
-                    <textarea id="cover-letter-output" class="input-control letter-textarea" placeholder="Enter Company Name and Job Position on the left, then click 'Generate Cover Letter'..."></textarea>
+                    <textarea id="cover-letter-output" class="input-control letter-textarea" placeholder="Tailored cover letter will appear here automatically upon evaluation..."></textarea>
                 </div>
 
                 <div class="letter-meta-bar">
@@ -343,30 +367,31 @@
                         <span id="letter-read-time">0 min read</span>
                     </div>
                     <div class="platform-guide-inline" id="platform-guide-box">
-                        <strong id="guide-title">LinkedIn Tip:</strong>
-                        <span id="guide-text">Attach Resume PDF and include this cover letter in the application note.</span>
+                        <strong id="guide-title">Semi-Auto Workflow:</strong>
+                        <span id="guide-text">Shortlist as 'Considering' -> Submit manually on platform -> Change status to 'Submitted'.</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Section 4: CSV Application History Table -->
+        <!-- Section 4: CSV & Excel Application History Table -->
         <section class="panel-card">
             <div class="table-section-header">
                 <div>
-                    <h2 class="card-heading">4. Application History (<span class="mono">Job Application - Second Jobber.csv</span>)</h2>
-                    <p class="card-desc">Live bi-directional sync with your spreadsheet. Update statuses or review sent cover letters.</p>
+                    <h2 class="card-heading">4. Application History &amp; Semi-Auto Queue (<span class="mono">CSV &amp; .xlsx</span>)</h2>
+                    <p class="card-desc">Review jobs in <code>Considering</code>, submit manually, and click <strong>Mark Submitted</strong>. Click <strong>Prep Deck</strong> on any submitted role to prepare your interview presentation.</p>
                 </div>
 
                 <div class="table-controls">
                     <div class="search-box">
                         <svg class="search-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                        <input type="text" id="history-search" class="input-control input-search" placeholder="Filter by company, role, notes..." oninput="filterHistoryTable()" />
+                        <input type="text" id="history-search" class="input-control input-search" placeholder="Filter company, role, notes..." oninput="filterHistoryTable()" />
                     </div>
 
                     <div class="status-tabs" id="status-filter-tabs">
                         <button class="tab-item active" onclick="setStatusFilter('All')">All (<span id="count-all" class="mono">0</span>)</button>
-                        <button class="tab-item" onclick="setStatusFilter('Resume Sent')">Sent (<span id="count-sent" class="mono">0</span>)</button>
+                        <button class="tab-item" onclick="setStatusFilter('Considering')">Considering (<span id="count-considering" class="mono">0</span>)</button>
+                        <button class="tab-item" onclick="setStatusFilter('Submitted')">Submitted (<span id="count-sent" class="mono">0</span>)</button>
                         <button class="tab-item" onclick="setStatusFilter('Interview Scheduled')">Interview (<span id="count-interview" class="mono">0</span>)</button>
                         <button class="tab-item" onclick="setStatusFilter('Not Pass?')">Closed (<span id="count-notpass" class="mono">0</span>)</button>
                     </div>
@@ -382,19 +407,48 @@
                 <table class="history-table" id="history-table">
                     <thead>
                         <tr>
-                            <th style="width: 52px;">ID</th>
+                            <th style="width: 48px;">ID</th>
                             <th>Company</th>
                             <th>Position</th>
-                            <th style="width: 185px;">Status</th>
-                            <th style="width: 120px;">Date Sent</th>
-                            <th style="width: 170px;">Salary</th>
-                            <th style="width: 130px; text-align: right;">Actions</th>
+                            <th style="width: 190px;">Status</th>
+                            <th style="width: 115px;">Date Sent</th>
+                            <th style="width: 165px;">Salary</th>
+                            <th style="width: 240px; text-align: right;">Semi-Auto Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="history-table-body">
-                        <!-- Dynamically populated -->
-                    </tbody>
+                    <tbody id="history-table-body"></tbody>
                 </table>
+            </div>
+        </section>
+
+        <!-- Section 5: Company Intelligence & Presentation Prep Mode (For Submitted Jobs) -->
+        <section class="panel-card" id="prep-studio-section">
+            <div class="table-section-header">
+                <div>
+                    <h2 class="card-heading">5. Company Intelligence &amp; Interview Presentation Prep Mode</h2>
+                    <p class="card-desc">Select any <code>Submitted</code> / <code>Resume Sent</code> application to generate company research, a 5-slide presentation outline, and interview talking points.</p>
+                </div>
+
+                <div class="prep-controls">
+                    <select id="prep-job-select" class="input-control" style="min-width: 280px;" onchange="onPrepSelectChange()">
+                        <option value="">-- Select a Submitted Job --</option>
+                    </select>
+                    <button class="btn btn-primary btn-sm" onclick="generatePrepFromSelected()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                        Generate 5-Slide Presentation Kit
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="copyPrepMarkdown()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copy Markdown Deck
+                    </button>
+                </div>
+            </div>
+
+            <div id="prep-content-area" class="prep-workspace-grid">
+                <!-- Populated dynamically by Prep Agent -->
+                <div class="prep-empty-state">
+                    Select a submitted application above or click <strong>"Prep Deck"</strong> on any row in the History Table to build your customized 5-slide presentation and company research kit.
+                </div>
             </div>
         </section>
     </main>
@@ -415,10 +469,7 @@
                 <textarea id="modal-letter-content" class="input-control modal-textarea" readonly></textarea>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-outline" onclick="copyModalLetter()">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                    Copy Text
-                </button>
+                <button class="btn btn-outline" onclick="copyModalLetter()">Copy Text</button>
                 <button class="btn btn-primary" onclick="closeLetterModal()">Close</button>
             </div>
         </div>

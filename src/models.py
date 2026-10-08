@@ -1,7 +1,8 @@
-"""Data models for candidate profile, salary evaluation, applications, and platforms.
+"""Data models for candidate profile, salary evaluation, compatibility scoring,
+company presentation preparation, applications, and platforms.
 """
 
-from typing import List, Optional
+from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
 
 
@@ -60,7 +61,70 @@ class CoverLetterRequest(BaseModel):
     job_description: Optional[str] = ""
     target_salary_min: Optional[int] = 40000
     target_salary_max: Optional[int] = 45000
-    focus_domain: Optional[str] = "ai_backend"  # ai_backend, fintech, vision, rag, general
+    focus_domain: Optional[str] = "ai_backend"
+
+
+class CompatibilityRequest(BaseModel):
+    company_name: str = ""
+    job_position: str
+    job_description: str = ""
+    platform: str = "linkedin"
+    link: str = ""
+    min_salary: int = 40000
+    max_salary: int = 45000
+    llm_provider: Optional[str] = None  # auto, ollama, openai, heuristic
+
+
+class CompatibilityResult(BaseModel):
+    overall_score: int = Field(description="0-100 overall compatibility score")
+    skill_match_score: int = Field(description="0-100 technical resume match score")
+    goal_alignment_score: int = Field(description="0-100 career goal alignment with aboutme.txt")
+    salary_fit_score: int = Field(description="0-100 salary compatibility score")
+    is_compatible: bool = Field(description="True if overall_score meets threshold")
+    recommended_status: str = Field(default="Considering")
+    verdict_label: str
+    matched_skills: List[str] = []
+    growth_skills: List[str] = []
+    matched_goals: List[str] = []
+    reasoning: str
+    suggested_domain: str = "ai_backend"
+    engine_used: str = "smart_profile_matcher"
+
+
+class PresentationSlide(BaseModel):
+    slide_number: int
+    title: str
+    subtitle: str
+    bullet_points: List[str]
+    speaker_notes: str
+
+
+class InterviewQA(BaseModel):
+    question: str
+    key_talking_points: str
+
+
+class CompanyPrepRequest(BaseModel):
+    record_id: Optional[int] = None
+    company_name: str
+    job_position: str
+    industry: Optional[str] = ""
+    job_description: Optional[str] = ""
+    llm_provider: Optional[str] = None
+
+
+class CompanyPrepReport(BaseModel):
+    company_name: str
+    job_position: str
+    industry_category: str
+    company_overview: str
+    strategic_alignment: str
+    key_focus_areas: List[str]
+    research_links: List[Dict[str, str]]
+    presentation_slides: List[PresentationSlide]
+    interview_qas: List[InterviewQA]
+    markdown_deck: str
+    engine_used: str = "smart_prep_agent"
 
 
 class ApplicationRecord(BaseModel):
@@ -74,7 +138,7 @@ class ApplicationRecord(BaseModel):
     location: str = "Bangkok, Thailand"
     offer_salary: str = ""
     priority: str = "First"
-    status: str = "Resume Sent"
+    status: str = "Considering"
     salary: str = "40,000 - 45,000 THB"
     hr_email: str = ""
     resume_sent: str = ""

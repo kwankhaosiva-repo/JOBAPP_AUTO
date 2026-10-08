@@ -43,10 +43,17 @@ env/
 .coverage
 htmlcov/
 
-# Playwright & Browsers
+# Playwright & Browser Automation artifacts
 test-results/
 playwright-report/
 
-# Personal / Sensitive Docs (Preserve template/examples if needed)
-# docs/ contains personal resumes and job application history
+# Scripts & temporary utilities
+scripts/
+
+# AI IDE / Agent artifacts & skills cache
+skills/
+skills-lock.json
+.antigravity/
+
+# Personal / Sensitive Docs (contains resume PDFs, DOCX, and application history CSV/XLSX)
 docs/
